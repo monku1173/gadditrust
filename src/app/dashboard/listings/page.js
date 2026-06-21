@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Plus, Edit, Trash2, Eye } from 'lucide-react'
 
 export default function ListingsPage() {
@@ -7,7 +8,7 @@ export default function ListingsPage() {
     {
       id: 1,
       title: 'Honda City 2015',
-      price: '₹6,50,000',
+      price: '6,50,000',
       views: 234,
       inquiries: 12,
       status: 'active',
@@ -15,7 +16,7 @@ export default function ListingsPage() {
     {
       id: 2,
       title: 'Maruti Swift 2018',
-      price: '₹5,80,000',
+      price: '5,80,000',
       views: 189,
       inquiries: 8,
       status: 'active',
@@ -23,7 +24,7 @@ export default function ListingsPage() {
     {
       id: 3,
       title: 'Bajaj Pulsar 2019',
-      price: '₹1,20,000',
+      price: '1,20,000',
       views: 156,
       inquiries: 5,
       status: 'sold',
@@ -38,10 +39,12 @@ export default function ListingsPage() {
           <h1 className="text-3xl font-bold text-gray-900">My Listings</h1>
           <p className="text-gray-600 mt-1">Manage all your vehicle listings</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-          <Plus size={20} />
-          New Listing
-        </button>
+        <Link href="/dashboard/listings/new">
+          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+            <Plus size={20} />
+            New Listing
+          </button>
+        </Link>
       </div>
 
       {/* Listings Table */}
@@ -61,7 +64,7 @@ export default function ListingsPage() {
             {listings.map((listing) => (
               <tr key={listing.id} className="hover:bg-gray-50 transition">
                 <td className="px-6 py-4 text-sm font-medium text-gray-900">{listing.title}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">{listing.price}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">₹{listing.price}</td>
                 <td className="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
                   <Eye size={16} />
                   {listing.views}
