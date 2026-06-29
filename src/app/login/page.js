@@ -1,9 +1,11 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { sellerAPI, setAuthToken } from '@/lib/sellerAPI'
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -42,41 +44,39 @@ export default function LoginPage() {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Call login function from store
-      login({
-        id: '1',
-        email: email,
-        name: email.split('@')[0],
-        avatar: `https://ui-avatars.com/api/?name=${email}`,
-      })
+      const response = await sellerAPI.login({ email, password })
 
-      // Redirect to dashboard
+      if (!response?.token || !response?.user) {
+        throw new Error('Invalid login response from server')
+      }
+
+      setAuthToken(response.token)
+      login(response.user, response.token)
+
       router.push('/dashboard')
     } catch (err) {
-      setError('Login failed. Please try again.')
+      setError(err.message || 'Login failed. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(13,148,136,0.18),_transparent_32%),linear-gradient(135deg,_#f7fbf9_0%,_#e7f4ef_42%,_#dbeafe_100%)] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white/95 backdrop-blur-sm rounded-[28px] shadow-[0_24px_80px_rgba(15,23,42,0.14)] border border-white/70 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-blue-600 mb-2">Gadditrust</h1>
-            <p className="text-gray-600">Seller Portal</p>
-            <p className="text-sm text-gray-500 mt-2">Second-hand Vehicle Marketplace</p>
+            <div className="inline-flex items-center rounded-full bg-teal-50 px-4 py-1 text-sm font-semibold text-teal-700 mb-4">
+              Seller Portal
+            </div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Gadditrust</h1>
+            <p className="text-slate-600">Sign in to manage your vehicle listings and leads</p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+            <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-2xl mb-6 text-sm">
               {error}
             </div>
           )}
@@ -89,14 +89,14 @@ export default function LoginPage() {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-3 text-slate-400" size={20} />
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -107,19 +107,19 @@ export default function LoginPage() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-3 text-slate-400" size={20} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-10 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -131,38 +131,41 @@ export default function LoginPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-teal-600 border-slate-300 rounded focus:ring-teal-500"
                 />
-                <span className="ml-2 text-gray-700">Remember me</span>
+                <span className="ml-2 text-slate-700">Remember me</span>
               </label>
-              <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
+              <button type="button" className="text-teal-700 hover:text-teal-900 font-medium">
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-teal-600 to-sky-600 text-white py-3 rounded-2xl font-semibold hover:shadow-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {loading ? 'Logging in...' : 'Login'}
+              {loading ? 'Logging in...' : (
+                <>
+                  Login <ArrowRight size={18} />
+                </>
+              )}
             </button>
           </form>
 
           {/* Signup Link */}
-          <p className="text-center text-gray-600 text-sm mt-6">
+          <p className="text-center text-slate-600 text-sm mt-6">
             Don't have an account?{' '}
-            <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
+            <Link href="/register" className="text-teal-700 hover:text-teal-900 font-semibold">
               Sign up
-            </a>
+            </Link>
           </p>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-            <p className="font-semibold text-blue-900 mb-2">Demo Credentials:</p>
-            <p className="text-blue-800">Email: demo@gadditrust.com</p>
-            <p className="text-blue-800">Password: demo123</p>
+          {/* Backend Credentials Notice */}
+          <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm">
+            <p className="font-semibold text-slate-900 mb-2">New here?</p>
+            <p className="text-slate-700">Create a seller account to add listings, receive buyer inquiries, and manage your storefront from the dashboard.</p>
           </div>
         </div>
       </div>

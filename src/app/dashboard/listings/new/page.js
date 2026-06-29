@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { Upload, X, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { sellerAPI } from '@/lib/sellerAPI'
 
 export default function NewListingPage() {
   const router = useRouter()
   const [images, setImages] = useState([])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
 
   // Form state
   const [formData, setFormData] = useState({
@@ -100,6 +102,7 @@ export default function NewListingPage() {
           ...prev,
           {
             id: Date.now() + Math.random(),
+            file,
             src: event.target.result,
             name: file.name,
           }
@@ -118,35 +121,52 @@ export default function NewListingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
     // Validation
-    if (!formData.brand || !formData.model || !formData.price) {
-      alert('Please fill in all required fields')
+    if (!formData.brand || !formData.model || !formData.price || !formData.city || !formData.state) {
+      setError('Please fill in all required fields')
       setLoading(false)
       return
     }
 
     if (images.length === 0) {
-      alert('Please upload at least one image')
+      setError('Please upload at least one image')
       setLoading(false)
       return
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
       console.log('Form Data:', formData)
       console.log('Images:', images.length)
       
-      setSuccess(true)
+      const payload = new FormData()
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') return
+
+        if (Array.isArray(value)) {
+          value.forEach((item) => payload.append(key, item))
+        } else {
+          payload.append(key, value)
+        }
+      })
+
+      images.forEach((image) => {
+        payload.append('images', image.file)
+      })
+
+      console.log('Sending payload to API...')
+      const response = await sellerAPI.createVehicle(payload)
+      console.log('API Response:', response)
       
-      // Show success message and redirect
+      setSuccess(true)
       setTimeout(() => {
         router.push('/dashboard/listings')
       }, 2000)
-    } catch (error) {
-      alert('Error creating listing. Please try again.')
+    } catch (uploadError) {
+      console.error('Upload Error:', uploadError)
+      setError(uploadError.message || 'Error creating listing. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -159,6 +179,13 @@ export default function NewListingPage() {
         <h1 className="text-3xl font-bold text-gray-900">Create New Listing</h1>
         <p className="text-gray-600 mt-1">Fill in the details to list your vehicle</p>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-lg mb-6">
+          ❌ {error}
+        </div>
+      )}
 
       {/* Success Message */}
       {success && (
@@ -597,7 +624,7 @@ export default function NewListingPage() {
             <button
               type="submit"
               disabled={loading || success}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Listing...' : success ? '✅ Listing Created!' : '✅ Create Listing'}
             </button>

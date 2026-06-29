@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
+import { sellerAPI } from '@/lib/sellerAPI'
 
 export default function DashboardLayout({ children }) {
   const router = useRouter()
-  const { isLoggedIn } = useAuthStore()
+  const { isLoggedIn, updateUser, logout } = useAuthStore()
 
   useEffect(() => {
     // Redirect to login if not logged in
@@ -16,6 +17,32 @@ export default function DashboardLayout({ children }) {
       router.push('/login')
     }
   }, [isLoggedIn, router])
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+
+    let cancelled = false
+
+    const syncUser = async () => {
+      try {
+        const response = await sellerAPI.me()
+        if (!cancelled && response?.user) {
+          updateUser(response.user)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          logout()
+          router.push('/login')
+        }
+      }
+    }
+
+    syncUser()
+
+    return () => {
+      cancelled = true
+    }
+  }, [isLoggedIn, updateUser, logout, router])
 
   if (!isLoggedIn) {
     return null

@@ -1,12 +1,14 @@
 'use client'
 
-import { Bell, User, ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { Bell, ChevronDown } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useState } from 'react'
 
 const Header = () => {
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const avatarSrc = user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || user?.businessName || 'Seller')}&background=0f766e&color=ffffff`
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -34,8 +36,8 @@ const Header = () => {
             className="flex items-center gap-3 hover:bg-gray-100 px-3 py-2 rounded-lg transition"
           >
             <img
-              src={user?.avatar}
-              alt={user?.name}
+              src={avatarSrc}
+              alt={user?.name || 'Seller'}
               className="w-8 h-8 rounded-full"
             />
             <span className="text-gray-700 font-medium">{user?.name}</span>
@@ -45,19 +47,26 @@ const Header = () => {
           {/* Profile Menu */}
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
-              <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+              <Link href="/dashboard/profile" onClick={() => setShowProfileMenu(false)} className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                 My Profile
-              </a>
-              <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+              </Link>
+              <Link href="/dashboard/settings" onClick={() => setShowProfileMenu(false)} className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                 Account Settings
-              </a>
-              <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+              </Link>
+              <button type="button" className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100">
                 Help & Support
-              </a>
+              </button>
               <hr className="my-2" />
-              <a href="#" className="block px-4 py-2 text-red-600 hover:bg-red-50">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowProfileMenu(false)
+                  logout()
+                }}
+                className="block w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+              >
                 Logout
-              </a>
+              </button>
             </div>
           )}
         </div>

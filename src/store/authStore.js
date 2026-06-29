@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { clearAuthToken } from '@/lib/sellerAPI'
 
 // Create auth store with Zustand
 const useAuthStore = create(
@@ -7,26 +8,40 @@ const useAuthStore = create(
     (set) => ({
       // State
       user: null,
+      token: null,
       isLoggedIn: false,
 
       // Actions
-      login: (userData) => {
+      login: (userData, token) => {
+        const normalizedUser = {
+          ...userData,
+          id: userData.id || userData._id,
+        }
+
         set({
-          user: userData,
+          user: normalizedUser,
+          token,
           isLoggedIn: true,
         })
       },
 
       logout: () => {
+        clearAuthToken()
         set({
           user: null,
+          token: null,
           isLoggedIn: false,
         })
       },
 
       updateUser: (userData) => {
+        const normalizedUser = {
+          ...userData,
+          id: userData.id || userData._id,
+        }
+
         set((state) => ({
-          user: { ...state.user, ...userData },
+          user: { ...state.user, ...normalizedUser },
         }))
       },
     }),

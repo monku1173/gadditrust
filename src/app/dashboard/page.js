@@ -1,9 +1,12 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { BarChart3, TrendingUp, Package, Eye } from 'lucide-react'
 import StatsCard from '@/components/StatsCard'
 
 export default function DashboardPage() {
+  const router = useRouter()
+
   const stats = [
     {
       title: 'Total Listings',
@@ -28,6 +31,29 @@ export default function DashboardPage() {
       value: '42',
       icon: BarChart3,
       color: 'bg-orange-500',
+    },
+  ]
+
+  const quickActions = [
+    {
+      label: '+ New Listing',
+      href: '/dashboard/listings/new',
+      className: 'w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition',
+    },
+    {
+      label: 'View All Listings',
+      href: '/dashboard/listings',
+      className: 'w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition',
+    },
+    {
+      label: 'View Inquiries',
+      href: '/dashboard/messages',
+      className: 'w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition',
+    },
+    {
+      label: 'Settings',
+      href: '/dashboard/settings',
+      className: 'w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition',
     },
   ]
 
@@ -74,18 +100,16 @@ export default function DashboardPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <button className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
-              + New Listing
-            </button>
-            <button className="w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
-              View All Listings
-            </button>
-            <button className="w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
-              View Inquiries
-            </button>
-            <button className="w-full bg-gray-200 text-gray-900 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
-              Settings
-            </button>
+            {quickActions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={() => router.push(action.href)}
+                className={action.className}
+              >
+                {action.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>

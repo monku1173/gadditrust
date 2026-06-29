@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Package, MessageSquare, BarChart3, Settings, LogOut, ChevronRight } from 'lucide-react'
+import { Home, Package, MessageSquare, BarChart3, Settings, LogOut, ChevronRight, UserCircle2 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 
 const Sidebar = () => {
@@ -12,6 +12,7 @@ const Sidebar = () => {
   // Menu items for sidebar
   const menuItems = [
     { icon: Home, label: 'Dashboard', href: '/dashboard', id: 'dashboard' },
+    { icon: UserCircle2, label: 'My Profile', href: '/dashboard/profile', id: 'profile' },
     { icon: Package, label: 'My Listings', href: '/dashboard/listings', id: 'listings' },
     { icon: MessageSquare, label: 'Messages', href: '/dashboard/messages', id: 'messages' },
     { icon: BarChart3, label: 'Analytics', href: '/dashboard/analytics', id: 'analytics' },
